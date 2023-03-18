@@ -1,5 +1,10 @@
 package cli;
 
+import cli.annotations.Command;
+import cli.annotations.OptionalArgs;
+import cli.annotations.Parameter;
+import org.apache.commons.cli.*;
+
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
@@ -11,43 +16,34 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import java.util.*;
 
 import static java.lang.String.format;
 
 /**
  * Common launcher for all the commands. 
  */
-public class EntryPoint {
+class EntryPoint {
 
 	//------------------------------------------------------------
 	// Class constants
 	
 	// Output encoding
-	public static final Charset ENCODING = Charset.forName("UTF-8");
+	public static final Charset ENCODING = StandardCharsets.UTF_8;
 	
 	//------------------------------------------------------------
 	// Class properties
 	
 	// Program's own standardOutput
-	private PrintWriter standardOutput;
-	private ByteArrayOutputStream standardOutputBuffer;
+	private final ByteArrayOutputStream standardOutputBuffer = new ByteArrayOutputStream();
+	private final PrintWriter standardOutput = new PrintWriter(
+		new OutputStreamWriter(standardOutputBuffer, ENCODING)
+	);
 	// Program's own errorOutput
-	private PrintWriter errorOutput;
-	private ByteArrayOutputStream errorOutputBuffer;
+	private final ByteArrayOutputStream errorOutputBuffer = new ByteArrayOutputStream();
+	private final PrintWriter errorOutput = new PrintWriter(
+		new OutputStreamWriter(errorOutputBuffer, ENCODING)
+	);
 	
 	//------------------------------------------------------------
 	// Class methods	
@@ -57,29 +53,24 @@ public class EntryPoint {
 	 * @param args Command arguments
 	 */
 	public static void main(String[] args) {
-		Date startEntryPoint = new Date();
 		int ret = 0;
-		try {
-			Path currentPath = Paths.get("").toAbsolutePath();	
+		try (var s = new Stopwatch("Total time")) {
+			Path currentPath = Paths.get("").toAbsolutePath();
 			String command = head(args);
 			List<String> rest = tail(args);
 			// Special case: when asked for --help, print the help straight now
 			if (rest.size() == 1 && rest.contains("--help")) {
 				printHelp(command);
-			}
-			else {
+			} else {
 				EntryPoint entry = new EntryPoint();
 				ret = entry.executeEntryPoint(command, rest, currentPath);
 				entry.flush(false);
 			}
+		} catch (CmdException cmde) {
+			cmde.printStackTrace();
+			System.err.println(cmde.getMessage());
+			System.exit(cmde.getReturnCode());
 		}
-		catch(CmdException unxe) {
-			unxe.printStackTrace();
-			System.err.println(unxe.getMessage());
-			System.exit(unxe.getReturnCode());
-		}
-		Date endEntryPoint = new Date();
-		printTime(startEntryPoint, endEntryPoint, "Total time");
 		// The command returned some exit code, this is our return code
 		System.exit(ret);
 	}
@@ -88,17 +79,15 @@ public class EntryPoint {
 	//	command
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private static void printHelp(String commandClassName) throws CmdException {
-		Class commandClass = lookForCommand(commandClassName);
-		if (commandClass == null) {
-			throw new CmdException(format("Command %s not recognized", commandClassName));
-		}
+		var introspection = new Introspection(commandClassName);
+		Class commandClass = introspection.getCommandClass();
 		Options options = buildOptions(commandClass);
 		String optionalArg = lookForOptionalArgs(commandClass);
 		String commandName = 
 				((Command)commandClass.getAnnotation(Command.class)).command();
 		String commandDescription = 
 				((Command)commandClass.getAnnotation(Command.class)).description();
-		String footer = "\nJUnxUtils v%s";
+		String footer = "\nv%s";
 		 
 		HelpFormatter formatter = new HelpFormatter();
 		if (optionalArg != null) {
@@ -163,17 +152,7 @@ public class EntryPoint {
 
 	// Initializes an entry point with its proper standard and error output
 	//	buffers
-	public EntryPoint() {
-		standardOutputBuffer = new ByteArrayOutputStream();
-		standardOutput = new PrintWriter(
-			new OutputStreamWriter(
-				standardOutputBuffer, ENCODING));
-		
-		errorOutputBuffer = new ByteArrayOutputStream();
-		errorOutput = new PrintWriter(
-			new OutputStreamWriter(
-				errorOutputBuffer, ENCODING));
-	}
+	public EntryPoint() { }
 	
 	/**
 	 * @return the standardOutputBuffer
@@ -201,11 +180,7 @@ public class EntryPoint {
 			System.err.println(getErrorOutputBuffer());
 		}
 	}
-	
-	private static void printTime(Date initial, Date ending, String message) {
-		//System.err.println(message + " -> " + (ending.getTime() - initial.getTime()) + " mseg");
-	}
-	
+
 	/**
 	 * Executes a command with certain parameters and path.
 	 * @param command Name of the command to execute.
@@ -217,25 +192,15 @@ public class EntryPoint {
 			throws CmdException {
 		int ret = 0;
 		if (command != null) {
-			Date beginLookForCommand = new Date();
-			Class<?> commandClass = lookForCommand(command);
-			//Class<?> commandClass = Class.forName(command);
-			Date endLookForCommand = new Date();
-			printTime(beginLookForCommand, endLookForCommand, "looking for command");
-			// Instantiate the proper command
-			Object theCommand = instantiateCommand(commandClass);
-			Date endInstantiateCommand = new Date();
-			printTime(endLookForCommand, endInstantiateCommand, "instantiate command");
-			// Look for an 'execute' method with the next arguments:
-			// Path - current path of the command
-			// PrintWriter - standard output
-			// PrintWriter - error output
-			Method execute = findExecuteMethod(commandClass);
-			Date endFindExecuteMethod = new Date();
-			printTime(endInstantiateCommand, endFindExecuteMethod, "find execute method");
-			ret = executeCommand(theCommand, execute, currentPath, commandArguments);
-			Date endExecuteCommand = new Date();
-			printTime(endFindExecuteMethod, endExecuteCommand, "execute command");
+			var introspection = new Introspection(command);
+			try (var s = new Stopwatch("execute command")) {
+				ret = executeCommand(
+					introspection.getCommand(),
+					introspection.getMethod(),
+					currentPath,
+					commandArguments
+				);
+			}
 		}
 		else {
 			throw new CmdException("Please specify which command you wish to launch", -1);
@@ -260,7 +225,7 @@ public class EntryPoint {
 				false);
 			applyArguments(command, commandLine);
 			// Apply the command line to the command
-			ret = execute.invoke(command, currentPath, standardOutput, errorOutput);
+			ret = execute.invoke(command, new ExecutionContext(currentPath, standardOutput, errorOutput));
 		} 
 		catch (IllegalAccessException 
 				| IllegalArgumentException 
@@ -276,7 +241,7 @@ public class EntryPoint {
 			throws IllegalAccessException, InvocationTargetException {
 		// Map the setter methods to commandLine option names
 		Method[] methods = command.getClass().getMethods();
-		Field fields[] = command.getClass().getDeclaredFields();
+		Field[] fields = command.getClass().getDeclaredFields();
 		Map<String, Method> methodsMap = new HashMap<>();
 		Method optionalArgsMethod = null;
 		for (Field field: fields) {			
@@ -319,7 +284,7 @@ public class EntryPoint {
 			// The method must exist and admit a list of strings as its only
 			//	parameter
 			List<String> args = Arrays.asList(commandLine.getArgs());
-			if (args != null && args.size() > 0) {
+			if (args.size() > 0) {
 				optionalArgsMethod.invoke(command, args);
 			}
 		}
@@ -352,23 +317,23 @@ public class EntryPoint {
 	private Object processArgument(Method method, String value) {
 		Object ret = null;
 		Class<?>[] types = method.getParameterTypes();
-		if (types != null && types.length == 1) {
+		if (types.length == 1) {
 			Class<?> type = types[0];
 			if (type.equals(String.class)) {
 				ret = value;
 			}
 			else if (type.equals(Integer.class)) {
-				ret = new Integer(value);
+				ret = Integer.valueOf(value);
 			}
 			else  if (type.equals(Long.class)) {
-				ret = new Long(value);
+				ret = Long.valueOf(value);
 			}
 			// This can be improved by looking closely at precision, etc.
 			else  if (type.equals(Double.class)) {
-				ret = new Double(value);
+				ret = Double.valueOf(value);
 			}
 			else  if (type.equals(Float.class)) {
-				ret = new Float(value);
+				ret = Float.valueOf(value);
 			}
 			// Boolean arguments
 			else if (type.equals(Boolean.class)) {
@@ -386,11 +351,11 @@ public class EntryPoint {
 
 	// This method build an Apache Command Line Options object upon
 	//	the annotated parameters information in the class
-	public static Options buildOptions(Class<? extends Object> commandClass) {
+	public static Options buildOptions(Class<?> commandClass) {
 		//Method[] methods = commandClass.getMethods();
 		// It will be the fields that get annotated, and those fields will get
 		//	us to the setter method
-		Field fields[] = commandClass.getDeclaredFields();
+		Field[] fields = commandClass.getDeclaredFields();
 		Options options = new Options();
 		for (Field field: fields) {
 			if (field.isAnnotationPresent(Parameter.class)) {
@@ -416,53 +381,6 @@ public class EntryPoint {
 		return options;
 	}
 
-	// Looks for the proper command class
-	// The search with google reflections has been optimized away to the gradle build process 
-	//	in order to get an improvement of ~0.15 sec for each program call.
-	@SuppressWarnings("rawtypes")
-	private static Class lookForCommand(String commandClassName) 
-			throws CmdException {
-		Class ret = null;
-		try {
-			ret = Class.forName(commandClassName);
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-			throw new CmdException(e);
-		}
-		return ret;
-	}
-	
-	// Instantiates a command object
-	private Object instantiateCommand(Class<?> commandClass) 
-			throws CmdException {
-		try {
-			return commandClass.getConstructor().newInstance();
-		} 
-		catch (InstantiationException 
-				| IllegalAccessException 
-				| IllegalArgumentException 
-				| InvocationTargetException
-				| NoSuchMethodException 
-				| SecurityException e) {
-			throw new CmdException(e).setReturnCode(-1337);
-		}		
-	}
-	
-	// Finds an execute method in the command class
-	private Method findExecuteMethod(Class<?> commandClass) 
-			throws CmdException {
-		try {
-			return commandClass.
-				getDeclaredMethod("execute", 
-						Path.class, 
-						PrintWriter.class, 
-						PrintWriter.class);
-		} catch (NoSuchMethodException | SecurityException e) {
-			throw new CmdException(e).setReturnCode(-1337);
-		}
-	}
-
 	/** Returns the first argument */
 	public static String head(String[] args) {
 		String ret = null;
@@ -476,9 +394,7 @@ public class EntryPoint {
 	public static List<String> tail(String[] args) {
 		List<String> ret  = new LinkedList<>();
 		if (args != null && args.length > 1) {
-			for (int i = 1; i < args.length; i++) {
-				ret.add(args[i]);
-			}
+			ret.addAll(Arrays.asList(args).subList(1, args.length));
 		}
 		return ret;
 	}

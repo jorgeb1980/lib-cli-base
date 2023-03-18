@@ -5,7 +5,7 @@ import org.apache.commons.lang.StringUtils;
 /**
  * Utility functions for presentation, etc.
  */
-class Utils {
+class Format {
 
 	// This method trims if necessary to
 	//	get to the target length
