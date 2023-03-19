@@ -14,11 +14,14 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.util.Set;
 
-@Mojo(name = "cli-generator", defaultPhase = LifecyclePhase.PREPARE_PACKAGE)
+@Mojo(name = "generate-files", defaultPhase = LifecyclePhase.PREPARE_PACKAGE)
 public class CliGeneratorMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     MavenProject project;
+
+    @Parameter(property = "package")
+    String packageName;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         final PluginDescriptor pluginDescriptor = (PluginDescriptor) getPluginContext().get("pluginDescriptor");
@@ -33,7 +36,10 @@ public class CliGeneratorMojo extends AbstractMojo {
             Class clazz = Class.forName("cli.annotations.Command");
             // Scan for the annotated classes
             Set<Class<?>> commands =
-                new org.reflections.Reflections("").getTypesAnnotatedWith(clazz);
+                new org.reflections.Reflections(packageName).getTypesAnnotatedWith(clazz);
+            for (Class<?> eachClazz: commands) {
+                System.out.println(eachClazz);
+            }
         } catch (ClassNotFoundException cnfe) {
             cnfe.printStackTrace();
         }
