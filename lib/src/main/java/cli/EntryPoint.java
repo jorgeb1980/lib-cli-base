@@ -17,6 +17,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static java.lang.String.format;
 
@@ -33,7 +35,9 @@ class EntryPoint {
 	
 	//------------------------------------------------------------
 	// Class properties
-	
+
+	// Logger
+	private final static Logger logger = Logger.getLogger(EntryPoint.class.getName());
 	// Program's own standardOutput
 	private final ByteArrayOutputStream standardOutputBuffer = new ByteArrayOutputStream();
 	private final PrintWriter standardOutput = new PrintWriter(
@@ -53,6 +57,7 @@ class EntryPoint {
 	 * @param args Command arguments
 	 */
 	public static void main(String[] args) {
+		LogUtils.setupLogs();
 		int ret = 0;
 		try (var s = new Stopwatch("Total time")) {
 			Path currentPath = Paths.get("").toAbsolutePath();
@@ -68,7 +73,7 @@ class EntryPoint {
 			}
 		} catch (CmdException cmde) {
 			cmde.printStackTrace();
-			System.err.println(cmde.getMessage());
+			logger.log(Level.SEVERE, cmde.getMessage());
 			System.exit(cmde.getReturnCode());
 		}
 		// The command returned some exit code, this is our return code
@@ -175,9 +180,9 @@ class EntryPoint {
 	 * and error output.
 	 */
 	public void flush(boolean error) {
-		System.out.println(getStandardOutputBuffer());
+		System.out.print(getStandardOutputBuffer());
 		if (error) {
-			System.err.println(getErrorOutputBuffer());
+			System.err.print(getErrorOutputBuffer());
 		}
 	}
 
