@@ -39,14 +39,12 @@ class EntryPoint {
 	// Logger
 	private final static Logger logger = Logger.getLogger(EntryPoint.class.getName());
 	// Program's own standardOutput
-	private final ByteArrayOutputStream standardOutputBuffer = new ByteArrayOutputStream();
 	private final PrintWriter standardOutput = new PrintWriter(
-		new OutputStreamWriter(standardOutputBuffer, ENCODING)
+		new OutputStreamWriter(new ByteArrayOutputStream(), ENCODING)
 	);
 	// Program's own errorOutput
-	private final ByteArrayOutputStream errorOutputBuffer = new ByteArrayOutputStream();
 	private final PrintWriter errorOutput = new PrintWriter(
-		new OutputStreamWriter(errorOutputBuffer, ENCODING)
+		new OutputStreamWriter(new ByteArrayOutputStream(), ENCODING)
 	);
 	
 	//------------------------------------------------------------
@@ -158,31 +156,17 @@ class EntryPoint {
 	// Initializes an entry point with its proper standard and error output
 	//	buffers
 	public EntryPoint() { }
-	
-	/**
-	 * @return the standardOutputBuffer
-	 */
-	public String getStandardOutputBuffer() {
-		standardOutput.flush();
-		return standardOutputBuffer.toString(ENCODING);
-	}
-
-	/**
-	 * @return the errorOutputBuffer
-	 */
-	public String getErrorOutputBuffer() {
-		errorOutput.flush();
-		return errorOutputBuffer.toString(ENCODING);
-	}
 
 	/**
 	 * Flush the content of the output buffers to the real standard
 	 * and error output.
 	 */
 	public void flush(boolean error) {
-		System.out.print(getStandardOutputBuffer());
+		standardOutput.flush();
+		System.out.print(standardOutput);
 		if (error) {
-			System.err.print(getErrorOutputBuffer());
+			errorOutput.flush();
+			System.err.print(errorOutput);
 		}
 	}
 
