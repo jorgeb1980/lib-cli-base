@@ -55,7 +55,7 @@ class EntryPoint {
 	 * @param args Command arguments
 	 */
 	public static void main(String[] args) {
-		LogUtils.setupLogs();
+		//LogUtils.setupLogs();
 		int ret = 0;
 		try (var s = new Stopwatch("Total time")) {
 			Path currentPath = Paths.get("").toAbsolutePath();
@@ -70,8 +70,7 @@ class EntryPoint {
 				entry.flush(false);
 			}
 		} catch (CmdException cmde) {
-			cmde.printStackTrace();
-			logger.log(Level.SEVERE, cmde.getMessage());
+			logger.log(Level.SEVERE, cmde.getMessage(), cmde);
 			System.exit(cmde.getReturnCode());
 		}
 		// The command returned some exit code, this is our return code
