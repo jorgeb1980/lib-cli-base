@@ -39,12 +39,12 @@ class EntryPoint {
 	// Logger
 	private final static Logger logger = Logger.getLogger(EntryPoint.class.getName());
 	// Program's own standardOutput
-	private final PrintWriter standardOutput = new PrintWriter(
-		new OutputStreamWriter(new ByteArrayOutputStream(), ENCODING)
+	private final ByteArrayOutputStream stdBytes = new ByteArrayOutputStream();
+	private final PrintWriter standardOutput = new PrintWriter(new OutputStreamWriter(stdBytes, ENCODING)
 	);
+	private final ByteArrayOutputStream errBytes = new ByteArrayOutputStream();
 	// Program's own errorOutput
-	private final PrintWriter errorOutput = new PrintWriter(
-		new OutputStreamWriter(new ByteArrayOutputStream(), ENCODING)
+	private final PrintWriter errorOutput = new PrintWriter(new OutputStreamWriter(errBytes, ENCODING)
 	);
 	
 	//------------------------------------------------------------
@@ -163,10 +163,10 @@ class EntryPoint {
 	 */
 	public void flush(boolean error) {
 		standardOutput.flush();
-		System.out.print(standardOutput);
+		System.out.print(stdBytes.toString(ENCODING));
 		if (error) {
 			errorOutput.flush();
-			System.err.print(errorOutput);
+			System.err.print(errBytes.toString(ENCODING));
 		}
 	}
 
