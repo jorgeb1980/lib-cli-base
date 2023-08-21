@@ -35,7 +35,7 @@ public class Introspection {
     public Class<?> getCommandClass() { return commandClass; }
 
     // Looks for the proper command class
-    // The search with google reflections has been optimized away to the gradle build process
+    // The search with google reflections has been optimized away to the build process
     //	in order to get an improvement of ~0.15 sec for each program call.
     @SuppressWarnings("rawtypes")
     private void lookForCommand()
