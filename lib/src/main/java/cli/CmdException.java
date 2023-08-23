@@ -4,7 +4,7 @@ package cli;
  * This class models a generic exception type for error handling through
  * the entire package.
  */
-class CmdException extends Exception {
+public class CmdException extends Exception {
 
 	//------------------------------------------------------------
 	// Class constants
@@ -19,7 +19,7 @@ class CmdException extends Exception {
 
 	//------------------------------------------------------------
 	// Class methods
-	
+
 	/**
 	 * Sets the return code for the exception.
 	 * @param code Return code for the command line application.
@@ -61,5 +61,14 @@ class CmdException extends Exception {
 	 */
 	public CmdException(Exception cause) {
 		super(cause);
+	}
+
+	/**
+	 * Builds an exception wrapping a possible cause.
+	 * @param cause Cause of the exception.
+	 */
+	public CmdException(Exception cause, String message, int returnCode) {
+		super(message, cause);
+		setReturnCode(returnCode);
 	}
 }

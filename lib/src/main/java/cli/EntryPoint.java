@@ -17,6 +17,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static java.lang.String.format;
 
@@ -33,16 +35,16 @@ class EntryPoint {
 	
 	//------------------------------------------------------------
 	// Class properties
-	
+
+	// Logger
+	private final static Logger logger = Logger.getLogger(EntryPoint.class.getName());
 	// Program's own standardOutput
-	private final ByteArrayOutputStream standardOutputBuffer = new ByteArrayOutputStream();
-	private final PrintWriter standardOutput = new PrintWriter(
-		new OutputStreamWriter(standardOutputBuffer, ENCODING)
+	private final ByteArrayOutputStream stdBytes = new ByteArrayOutputStream();
+	private final PrintWriter standardOutput = new PrintWriter(new OutputStreamWriter(stdBytes, ENCODING)
 	);
+	private final ByteArrayOutputStream errBytes = new ByteArrayOutputStream();
 	// Program's own errorOutput
-	private final ByteArrayOutputStream errorOutputBuffer = new ByteArrayOutputStream();
-	private final PrintWriter errorOutput = new PrintWriter(
-		new OutputStreamWriter(errorOutputBuffer, ENCODING)
+	private final PrintWriter errorOutput = new PrintWriter(new OutputStreamWriter(errBytes, ENCODING)
 	);
 	
 	//------------------------------------------------------------
@@ -53,6 +55,7 @@ class EntryPoint {
 	 * @param args Command arguments
 	 */
 	public static void main(String[] args) {
+		//LogUtils.setupLogs();
 		int ret = 0;
 		try (var s = new Stopwatch("Total time")) {
 			Path currentPath = Paths.get("").toAbsolutePath();
@@ -67,8 +70,7 @@ class EntryPoint {
 				entry.flush(false);
 			}
 		} catch (CmdException cmde) {
-			cmde.printStackTrace();
-			System.err.println(cmde.getMessage());
+			logger.log(Level.SEVERE, cmde.getMessage(), cmde);
 			System.exit(cmde.getReturnCode());
 		}
 		// The command returned some exit code, this is our return code
@@ -153,31 +155,17 @@ class EntryPoint {
 	// Initializes an entry point with its proper standard and error output
 	//	buffers
 	public EntryPoint() { }
-	
-	/**
-	 * @return the standardOutputBuffer
-	 */
-	public String getStandardOutputBuffer() {
-		standardOutput.flush();
-		return standardOutputBuffer.toString(ENCODING);
-	}
-
-	/**
-	 * @return the errorOutputBuffer
-	 */
-	public String getErrorOutputBuffer() {
-		errorOutput.flush();
-		return errorOutputBuffer.toString(ENCODING);
-	}
 
 	/**
 	 * Flush the content of the output buffers to the real standard
 	 * and error output.
 	 */
 	public void flush(boolean error) {
-		System.out.println(getStandardOutputBuffer());
+		standardOutput.flush();
+		System.out.print(stdBytes.toString(ENCODING));
 		if (error) {
-			System.err.println(getErrorOutputBuffer());
+			errorOutput.flush();
+			System.err.print(errBytes.toString(ENCODING));
 		}
 	}
 
