@@ -10,7 +10,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.classworlds.realm.ClassRealm;
-import org.codehaus.plexus.util.IOUtil;
 import org.reflections.Reflections;
 
 import java.io.File;
@@ -34,7 +33,7 @@ public class CliGeneratorMojo extends AbstractMojo {
     private String toString(InputStream is) {
         String ret = "";
         try {
-            ret = IOUtil.toString(is);
+            ret = new String(is.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
