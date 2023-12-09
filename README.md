@@ -85,8 +85,9 @@ in build time
 parameters for the script.
   - Each one allows to define `name`, `longName`, `description`, `hasArg` and `mandatory` attributes
     - `name`, `longName` will be used to identify the parameters in the command line.  At least one must be defined.
-      - `name` = "f": means the script can be called with `-f`
-      - `longName` = "file": means the script can be called with `--file`  
+      - `name` = "f": means the script can be called with `-f` or `--f`
+      - `longName` = "file": means the script can be called with `-file` or `--file`
+        - If both are present, all 4 alternatives are valid
     - `description` will be used to generate the `--help` output
     - `hasArg`: if false, the parameter is a flag and should be declared as `Boolean` in the command class.  If true, it 
 is expected to have some value and should be of type `String`
@@ -102,14 +103,14 @@ import cli.annotations.Run;
 import lombok.Setter;
 
 @Command(command = "whatever", description="sample command")
-public SampleCommand() {
+public class SampleCommand {
     
     @Setter // Remember that the framework will need to set this at some moment!
     @Parameter(name="f", longName="file", mandatory=true, hasArg=true, description="some file")
     private String file;
     @Setter
     @Parameter(name="v", longName="verbose", description="triggers chatty behavior")
-    private Boolean verbose;
+    private Boolean verbose = false;
 
     @Run
     public int execute(ExecutionContext ctx) throws Exception {
