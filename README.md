@@ -78,7 +78,7 @@ Create annotated command classes following these rules:
 in build time
 - Every command class must be annotated with `cli.annotations.Command`
   - The `command` attribute will be translated to the script name
-  - The `descrition` attribute will be used to generate the `--help` output
+  - The `description` attribute will be used to generate the `--help` output
 - Every command class must define a method annotated with `cli.annotations.Run` and receiving a single parameter of type 
 `cli.ExecutionContext` - this is your entry point for the command
 - Every command class may define optionally fields annotated with `cli.annotations.Parameter`, that will be translated into 
