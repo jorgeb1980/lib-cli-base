@@ -356,13 +356,10 @@ class EntryPoint {
 					required(parameter.mandatory()).
 					hasArg(parameter.hasArg()).
 					desc(parameter.description());
-				if (parameter.name().trim().isEmpty()) {
+				if (!parameter.longName().isEmpty())
 					optionBuilder.longOpt(parameter.longName());
-				}
-				else {
+				if (!parameter.name().trim().isEmpty())
 					optionBuilder.option(parameter.name());
-					optionBuilder.longOpt(parameter.longName().trim().isEmpty()?parameter.name():parameter.longName());
-				}
 				options.addOption(optionBuilder.build());
 			}
 		}
