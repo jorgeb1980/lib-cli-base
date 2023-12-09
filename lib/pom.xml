@@ -8,7 +8,7 @@
   </parent>
 
   <groupId>cli</groupId>
-  <artifactId>lib</artifactId>
+  <artifactId>lib-cli</artifactId>
 
   <dependencies>
     <dependency>

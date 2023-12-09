@@ -36,8 +36,8 @@
   <dependencies>
     <dependency>
       <groupId>cli</groupId>
-      <artifactId>lib</artifactId>
-      <version>${project.version}</version>
+      <artifactId>lib-cli</artifactId>
+      <version>${revision}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
