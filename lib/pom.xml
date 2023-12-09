@@ -4,12 +4,11 @@
   <parent>
     <artifactId>parent-pom</artifactId>
     <groupId>cli</groupId>
-    <version>1.2-SNAPSHOT</version>
+    <version>${revision}</version>
   </parent>
 
   <groupId>cli</groupId>
   <artifactId>lib</artifactId>
-  <version>1.2-SNAPSHOT</version>
 
   <dependencies>
     <dependency>

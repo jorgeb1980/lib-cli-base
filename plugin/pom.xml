@@ -3,12 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>cli</groupId>
   <artifactId>files-generator-maven-plugin</artifactId>
-  <version>1.2-SNAPSHOT</version>
 
   <parent>
     <artifactId>parent-pom</artifactId>
     <groupId>cli</groupId>
-    <version>1.2-SNAPSHOT</version>
+    <version>${revision}</version>
   </parent>
 
   <build>
