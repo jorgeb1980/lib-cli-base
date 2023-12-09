@@ -219,7 +219,11 @@ class EntryPoint {
 				| IllegalArgumentException 
 				| InvocationTargetException
 				| ParseException e) {
-			throw new CmdException(e).setReturnCode(-1337);
+			if (e instanceof MissingOptionException) {
+				ret = -1;
+				printHelp(command.getClass().getName());
+			} else
+				throw new CmdException(e).setReturnCode(-1337);
 		}
 		return (Integer) ret;
 	}
@@ -236,10 +240,10 @@ class EntryPoint {
 			Method method = lookForSetter(field, methods);
 			if (field.isAnnotationPresent(Parameter.class)) {
 				Parameter parameter = field.getAnnotation(Parameter.class);
-				if (parameter.name().trim().length() != 0) {
+				if (!parameter.name().trim().isEmpty()) {
 					methodsMap.put(parameter.name(), method);
 				}
-				if (parameter.longName().trim().length() != 0) {
+				if (!parameter.longName().trim().isEmpty()) {
 					methodsMap.put(parameter.longName(), method);
 				}
 				
@@ -340,7 +344,6 @@ class EntryPoint {
 	// This method build an Apache Command Line Options object upon
 	//	the annotated parameters information in the class
 	public static Options buildOptions(Class<?> commandClass) {
-		//Method[] methods = commandClass.getMethods();
 		// It will be the fields that get annotated, and those fields will get
 		//	us to the setter method
 		Field[] fields = commandClass.getDeclaredFields();
@@ -348,22 +351,19 @@ class EntryPoint {
 		for (Field field: fields) {
 			if (field.isAnnotationPresent(Parameter.class)) {
 				Parameter parameter = field.getAnnotation(Parameter.class);
-				// Look for the corresponding setter method
-				//Method method = lookForSetter(field, methods);
-				if (parameter.name().trim().length() == 0) {
-					options.addOption(
-						Option.builder().
-							hasArg(parameter.hasArg()).
-							desc(parameter.description()).
-							longOpt(parameter.longName()).build());
+				// Build the option
+				var optionBuilder = Option.builder().
+					required(parameter.mandatory()).
+					hasArg(parameter.hasArg()).
+					desc(parameter.description());
+				if (parameter.name().trim().isEmpty()) {
+					optionBuilder.longOpt(parameter.longName());
 				}
 				else {
-					options.addOption(
-						parameter.name(), 
-						parameter.longName().trim().length()==0?parameter.name():parameter.longName(), 
-						parameter.hasArg(), 
-						parameter.description());
+					optionBuilder.option(parameter.name());
+					optionBuilder.longOpt(parameter.longName().trim().isEmpty()?parameter.name():parameter.longName());
 				}
+				options.addOption(optionBuilder.build());
 			}
 		}
 		return options;
