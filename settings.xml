@@ -16,4 +16,12 @@
     <activeProfiles>
         <activeProfile>github-deploy</activeProfile>
     </activeProfiles>
+
+    <servers>
+        <server>
+            <id>github-deploy</id>
+            <username>jorgeb1980</username>
+            <password>${env.GITHUB_TOKEN}}</password>
+        </server>
+    </servers>
 </settings>
