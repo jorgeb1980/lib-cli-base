@@ -28,6 +28,6 @@
     </dependency>
   </dependencies>
 
-  <name>lib</name>
+  <name>lib-cli jar</name>
   <packaging>jar</packaging>
 </project>
