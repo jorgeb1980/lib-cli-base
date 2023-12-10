@@ -6,7 +6,7 @@
     <artifactId>apache</artifactId>
     <version>18</version>
   </parent>
-  <groupId>cli</groupId>
+  <groupId>cli-lib</groupId>
   <artifactId>parent-pom</artifactId>
   <version>${revision}</version>
   <name>parent-pom</name>

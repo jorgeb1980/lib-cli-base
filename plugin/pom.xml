@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>cli</groupId>
-  <artifactId>files-generator-maven-plugin</artifactId>
+  <groupId>cli-lib</groupId>
+  <artifactId>cli-maven-plugin</artifactId>
 
   <parent>
     <artifactId>parent-pom</artifactId>
-    <groupId>cli</groupId>
+    <groupId>cli-lib</groupId>
     <version>${revision}</version>
   </parent>
 
@@ -35,8 +35,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>cli</groupId>
-      <artifactId>lib-cli</artifactId>
+      <groupId>cli-lib</groupId>
+      <artifactId>cli-client-library</artifactId>
       <version>${revision}</version>
     </dependency>
     <dependency>

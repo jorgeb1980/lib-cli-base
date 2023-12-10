@@ -3,12 +3,12 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>parent-pom</artifactId>
-    <groupId>cli</groupId>
+    <groupId>cli-lib</groupId>
     <version>${revision}</version>
   </parent>
 
-  <groupId>cli</groupId>
-  <artifactId>lib-cli</artifactId>
+  <groupId>cli-lib</groupId>
+  <artifactId>cli-client-library</artifactId>
 
   <dependencies>
     <dependency>
