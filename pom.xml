@@ -6,7 +6,7 @@
     <artifactId>apache</artifactId>
     <version>18</version>
   </parent>
-  <groupId>cli-lib</groupId>
+  <groupId>cli-library</groupId>
   <artifactId>cli-parent-pom</artifactId>
   <version>${revision}</version>
   <name>parent-pom</name>
@@ -24,8 +24,8 @@
     </dependency>
   </dependencies>
   <build>
+    <!-- Necessary in order to support CI friendly father/child version management -->
     <plugins>
-      <!-- Necessary in order to support CI friendly father/child version management -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>flatten-maven-plugin</artifactId>
@@ -70,4 +70,12 @@
     <module>lib</module>
     <module>plugin</module>
   </modules>
+
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>GitHub jorgeb1980 Apache Maven Packages</name>
+      <url>https://maven.pkg.github.com/jorgeb1980/lib-shell-commands</url>
+    </repository>
+  </distributionManagement>
 </project>

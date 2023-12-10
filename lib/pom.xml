@@ -3,11 +3,10 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>cli-parent-pom</artifactId>
-    <groupId>cli-lib</groupId>
+    <groupId>cli-library</groupId>
     <version>${revision}</version>
   </parent>
 
-  <groupId>cli-lib-utils</groupId>
   <artifactId>cli-client-library</artifactId>
 
   <dependencies>
@@ -28,6 +27,6 @@
     </dependency>
   </dependencies>
 
-  <name>lib-cli jar</name>
+  <name>cli-client-library</name>
   <packaging>jar</packaging>
 </project>
