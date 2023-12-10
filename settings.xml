@@ -1,0 +1,19 @@
+<!-- Only used for deploying to github packages -->
+<settings>
+    <profiles>
+        <profile>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <id>github-deploy</id>
+            <properties>
+                <altSnapshotDeploymentRepository>snapshots::default::https://maven.pkg.github.com/jorgeb1980/lib-cli-base</altSnapshotDeploymentRepository>
+                <altReleaseDeploymentRepository>releases::default::https://maven.pkg.github.com/jorgeb1980/lib-cli-base</altReleaseDeploymentRepository>
+            </properties>
+        </profile>
+    </profiles>
+
+    <activeProfiles>
+        <activeProfile>github-deploy</activeProfile>
+    </activeProfiles>
+</settings>
