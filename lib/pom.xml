@@ -7,7 +7,7 @@
     <version>${revision}</version>
   </parent>
 
-  <groupId>cli-lib</groupId>
+  <groupId>cli-lib-utils</groupId>
   <artifactId>cli-client-library</artifactId>
 
   <dependencies>
