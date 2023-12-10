@@ -70,4 +70,12 @@
     <module>lib</module>
     <module>plugin</module>
   </modules>
+
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>GitHub jorgeb1980 Apache Maven Packages</name>
+      <url>https://maven.pkg.github.com/jorgeb1980/lib-cli-base</url>
+    </repository>
+  </distributionManagement>
 </project>

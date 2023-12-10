@@ -3,13 +3,10 @@
     <profiles>
         <profile>
             <id>github-deploy</id>
-            <repositories>
-                <repository>
-                    <id>github</id>
-                    <name>GitHub jorgeb1980 Apache Maven Packages</name>
-                    <url>https://maven.pkg.github.com/jorgeb1980/lib-shell-commands</url>
-                </repository>
-            </repositories>
+            <properties>
+                <altSnapshotDeploymentRepository>snapshots::default::https://maven.pkg.github.com/jorgeb1980/lib-cli-base</altSnapshotDeploymentRepository>
+                <altReleaseDeploymentRepository>releases::default::https://maven.pkg.github.com/jorgeb1980/lib-cli-base</altReleaseDeploymentRepository>
+            </properties>
         </profile>
     </profiles>
 
@@ -21,7 +18,7 @@
         <server>
             <id>github</id>
             <username>jorgeb1980</username>
-            <password>${env.GITHUB_TOKEN}}</password>
+            <password>${env.GITHUB_TOKEN}</password>
         </server>
     </servers>
 </settings>
