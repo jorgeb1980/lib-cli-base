@@ -4,8 +4,8 @@
         <profile>
             <id>github-deploy</id>
             <properties>
-                <altSnapshotDeploymentRepository>snapshots::default::https://maven.pkg.github.com/jorgeb1980/lib-cli-base</altSnapshotDeploymentRepository>
-                <altReleaseDeploymentRepository>releases::default::https://maven.pkg.github.com/jorgeb1980/lib-cli-base</altReleaseDeploymentRepository>
+                <altSnapshotDeploymentRepository>snapshots::default::https://jorgeb1980:${env.GITHUB_TOKEN}@maven.pkg.github.com/jorgeb1980/lib-cli-base</altSnapshotDeploymentRepository>
+                <altReleaseDeploymentRepository>releases::default::https://jorgeb1980:${env.GITHUB_TOKEN}@maven.pkg.github.com/jorgeb1980/lib-cli-base</altReleaseDeploymentRepository>
             </properties>
         </profile>
     </profiles>
