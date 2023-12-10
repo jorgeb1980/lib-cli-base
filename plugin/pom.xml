@@ -5,7 +5,7 @@
   <artifactId>cli-maven-plugin</artifactId>
 
   <parent>
-    <artifactId>parent-pom</artifactId>
+    <artifactId>cli-parent-pom</artifactId>
     <groupId>cli-lib</groupId>
     <version>${revision}</version>
   </parent>
