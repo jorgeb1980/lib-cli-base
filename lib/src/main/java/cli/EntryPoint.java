@@ -236,7 +236,7 @@ class EntryPoint {
 		Field[] fields = command.getClass().getDeclaredFields();
 		Map<String, Method> methodsMap = new HashMap<>();
 		Method optionalArgsMethod = null;
-		for (Field field: fields) {			
+		for (Field field: fields) {
 			Method method = lookForSetter(field, methods);
 			if (field.isAnnotationPresent(Parameter.class)) {
 				Parameter parameter = field.getAnnotation(Parameter.class);
@@ -264,7 +264,7 @@ class EntryPoint {
 		//	present, it is assumed to be true
 		
 		for (Option option: commandLine.getOptions()) {
-			Method method = methodsMap.get(option.getArgName());
+			Method method = methodsMap.get(option.getOpt());
 			if (method == null) {
 				method = methodsMap.get(option.getLongOpt());
 			}

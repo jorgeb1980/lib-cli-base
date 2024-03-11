@@ -25,7 +25,7 @@
   <dependencies>
     <dependency>
       <groupId>cli-library</groupId>
-      <artifactId>cli-client-library</artifactId>
+      <artifactId>cli-command-library</artifactId>
       <version>${revision}</version>
     </dependency>
     <dependency>
