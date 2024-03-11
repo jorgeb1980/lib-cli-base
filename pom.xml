@@ -13,7 +13,7 @@
   <packaging>pom</packaging>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <revision>1.4-SNAPSHOT</revision>
+    <revision>1.5-SNAPSHOT</revision>
   </properties>
   <dependencies>
     <dependency>
