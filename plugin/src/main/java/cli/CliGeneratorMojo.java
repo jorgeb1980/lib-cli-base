@@ -27,9 +27,6 @@ public class CliGeneratorMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     MavenProject project;
 
-    @Parameter(property = "package")
-    String packageName;
-
     private String toString(InputStream is) {
         String ret = "";
         try {
@@ -71,7 +68,7 @@ public class CliGeneratorMojo extends AbstractMojo {
         try {
             Class clazz = Class.forName("cli.annotations.Command");
             // Scan for the annotated classes
-            Set<Class<?>> commands = new Reflections(packageName).getTypesAnnotatedWith(clazz);
+            Set<Class<?>> commands = new Reflections().getTypesAnnotatedWith(clazz);
             for (Class<?> eachClazz: commands) {
                 System.out.println(eachClazz);
             }

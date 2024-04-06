@@ -20,9 +20,6 @@ Include the dependency for the lib and the plugin itself in your pom.xml
   <groupId>cli</groupId>
   <artifactId>files-generator-maven-plugin</artifactId>
   <version>${cli.library.version}</version>
-  <configuration>
-      <packageName>whatever.package.will.contain.your.annotated.pojos</packageName>
-  </configuration>
   <executions>
       <execution>
           <goals>
@@ -100,18 +97,18 @@ import cli.ExecutionContext;
 import cli.annotations.Command;
 import cli.annotations.Parameter;
 import cli.annotations.Run;
-import lombok.Setter;
 
 @Command(command = "whatever", description="sample command")
 public class SampleCommand {
     
-    @Setter // Remember that the framework will need to set this at some moment!
     @Parameter(name="f", longName="file", mandatory=true, hasArg=true, description="some file")
     private String file;
-    @Setter
+    public void setFile(String f) { file = f; }
+  
     @Parameter(name="v", longName="verbose", description="triggers chatty behavior")
     private Boolean verbose = false;
-
+    public void setVerbose(Boolean v) { verbose = v; }
+  
     @Run
     public int execute(ExecutionContext ctx) throws Exception {
         // do something
