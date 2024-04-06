@@ -17,7 +17,7 @@ class Stopwatch implements AutoCloseable {
 
     @Override
     public void close() throws CmdException {
-        Date ending = new Date();
+        var ending = new Date();
         logger.log(Level.FINE, message + " -> " + (ending.getTime() - initial.getTime()) + " mseg");
     }
 }

@@ -15,8 +15,8 @@ public class LogUtils {
             LogManager.getLogManager().readConfiguration(stream);
             // We can override log level by the env variable CLI_LOG_LEVEL
             // It can take any value in the java util logging Level enumeration
-            String value = System.getenv(ENV_VAR);
-            var level = (value != null && value.trim().length() > 0)
+            var value = System.getenv(ENV_VAR);
+            var level = (value != null && !value.trim().isEmpty())
                 ? Level.parse(value.toUpperCase())
                 : null;
             if (level != null) {
