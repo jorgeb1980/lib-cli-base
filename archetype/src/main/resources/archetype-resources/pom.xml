@@ -11,7 +11,7 @@
         <java.compiler.version>21</java.compiler.version>
     </properties>
     <build>
-        <finalName>redist/libs/command</finalName>
+        <finalName>redist/libs/\${artifactId}-\${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>cli-library</groupId>
@@ -34,6 +34,7 @@
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
+                            <includeScope>runtime</includeScope>
                             <outputDirectory>\${project.build.directory}/redist/libs</outputDirectory>
                         </configuration>
                     </execution>
