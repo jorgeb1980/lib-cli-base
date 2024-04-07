@@ -3,8 +3,9 @@ package cli;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
+
+import static java.util.logging.LogManager.getLogManager;
+import static java.util.logging.Logger.getLogger;
 
 public class LogUtils {
 
@@ -12,7 +13,7 @@ public class LogUtils {
 
     public LogUtils() {
         try(InputStream stream = LogUtils.class.getResourceAsStream("/cli-logging.properties")) {
-            LogManager.getLogManager().readConfiguration(stream);
+            getLogManager().readConfiguration(stream);
             // We can override log level by the env variable CLI_LOG_LEVEL
             // It can take any value in the java util logging Level enumeration
             var value = System.getenv(ENV_VAR);
@@ -20,9 +21,9 @@ public class LogUtils {
                 ? Level.parse(value.toUpperCase())
                 : null;
             if (level != null) {
-                Logger.getLogger("cli").setLevel(level);
+                getLogger("cli").setLevel(level);
                 // The following message will only be shown if log is fine enough
-                Logger.getLogger("cli").log(
+                getLogger("cli").log(
                     Level.FINEST,
                     String.format("Overridden log level to %s by env var %s", level, ENV_VAR)
                 );
