@@ -21,17 +21,20 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Set;
 
+import static java.nio.file.Files.readAttributes;
+import static java.nio.file.Files.setPosixFilePermissions;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFileAttributes;
+import static java.nio.file.attribute.PosixFilePermission.*;
+
 @Mojo(name = "generate-files", defaultPhase = LifecyclePhase.PREPARE_PACKAGE)
 public class CliGeneratorMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     MavenProject project;
 
-    @Parameter(property = "package")
-    String packageName;
-
     private String toString(InputStream is) {
-        String ret = "";
+        var ret = "";
         try {
             ret = new String(is.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException ioe) {
@@ -43,26 +46,25 @@ public class CliGeneratorMojo extends AbstractMojo {
     private void makeExecutable(File f) throws IOException {
         try {
             java.nio.file.Path path = f.toPath();
-            Set<java.nio.file.attribute.PosixFilePermission> perms =
-                java.nio.file.Files.readAttributes(path, java.nio.file.attribute.PosixFileAttributes.class).permissions();
+            Set<PosixFilePermission> perms = readAttributes(path, PosixFileAttributes.class).permissions();
 
-            perms.add(java.nio.file.attribute.PosixFilePermission.OWNER_WRITE);
-            perms.add(java.nio.file.attribute.PosixFilePermission.OWNER_READ);
-            perms.add(java.nio.file.attribute.PosixFilePermission.OWNER_EXECUTE);
-            perms.add(java.nio.file.attribute.PosixFilePermission.GROUP_READ);
-            perms.add(java.nio.file.attribute.PosixFilePermission.GROUP_EXECUTE);
-            perms.add(java.nio.file.attribute.PosixFilePermission.OTHERS_READ);
-            perms.add(java.nio.file.attribute.PosixFilePermission.OTHERS_EXECUTE);
-            java.nio.file.Files.setPosixFilePermissions(path, perms);
+            perms.add(OWNER_WRITE);
+            perms.add(OWNER_READ);
+            perms.add(OWNER_EXECUTE);
+            perms.add(GROUP_READ);
+            perms.add(GROUP_EXECUTE);
+            perms.add(OTHERS_READ);
+            perms.add(OTHERS_EXECUTE);
+            setPosixFilePermissions(path, perms);
         } catch (UnsupportedOperationException uoe) {
             System.err.println(uoe.getMessage());
         }
     }
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        final PluginDescriptor pluginDescriptor = (PluginDescriptor) getPluginContext().get("pluginDescriptor");
-        final ClassRealm classRealm = pluginDescriptor.getClassRealm();
-        final File classes = new File(project.getBuild().getOutputDirectory());
+        var pluginDescriptor = (PluginDescriptor) getPluginContext().get("pluginDescriptor");
+        var classRealm = pluginDescriptor.getClassRealm();
+        var classes = new File(project.getBuild().getOutputDirectory());
         try {
             classRealm.addURL(classes.toURI().toURL());
         } catch (MalformedURLException e) {
@@ -71,25 +73,25 @@ public class CliGeneratorMojo extends AbstractMojo {
         try {
             Class clazz = Class.forName("cli.annotations.Command");
             // Scan for the annotated classes
-            Set<Class<?>> commands = new Reflections(packageName).getTypesAnnotatedWith(clazz);
+            Set<Class<?>> commands = new Reflections().getTypesAnnotatedWith(clazz);
             for (Class<?> eachClazz: commands) {
                 System.out.println(eachClazz);
             }
             File scriptsDir = new File(project.getBuild().getDirectory(), "redist/scripts");
             scriptsDir.mkdirs();
             for (String templateName: List.of("template.bat", "template.sh")) {
-                String templateContent = toString(CliGeneratorMojo.class.getClassLoader().getResourceAsStream(templateName));
+                var templateContent = toString(CliGeneratorMojo.class.getClassLoader().getResourceAsStream(templateName));
                 for (Class<?> command : commands) {
-                    String extension = templateName.substring(templateName.lastIndexOf(".") + 1);
+                    var extension = templateName.substring(templateName.lastIndexOf(".") + 1);
                     // For every annotated class, create a file based on the template
-                    Command annotation = (Command) command.getAnnotation(clazz);
-                    String commandName = annotation.command();
+                    var annotation = (Command) command.getAnnotation(clazz);
+                    var commandName = annotation.command();
                     // Optimization: let the entry point get straight the class name,
                     //	we are making the work in advance!
-                    String commandClass = command.getCanonicalName();
-                    File script = new File(scriptsDir, commandName + "." + extension);
+                    var commandClass = command.getCanonicalName();
+                    var script = new File(scriptsDir, commandName + "." + extension);
                     script.createNewFile();
-                    String formattedText = templateContent.replaceAll("<<COMMAND_CLASS>>", commandClass);
+                    var formattedText = templateContent.replaceAll("<<COMMAND_CLASS>>", commandClass);
                     Files.write(script.toPath(), formattedText.getBytes(StandardCharsets.UTF_8));
                     makeExecutable(script);
                 }

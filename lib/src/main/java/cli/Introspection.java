@@ -66,14 +66,14 @@ public class Introspection {
     // Finds an execute method in the command class
     private void findExecuteMethod() throws CmdException {
         try {
-            List<Method> methods =
+            var methods =
                 Arrays.stream(commandClass.getDeclaredMethods()).filter(
                     m -> m.isAnnotationPresent(Run.class)
                 ).toList();
-            if (methods.size() == 0) throw new NoSuchElementException();
+            if (methods.isEmpty()) throw new NoSuchElementException();
             else if (methods.size() > 1) throw new CmdException("Only one method annotated as 'Run' per command class");
             else {
-                Method m = methods.get(0);
+                var m = methods.get(0);
                 if (m.getParameters().length != 1 || m.getParameters()[0].getType() != ExecutionContext.class) {
                     throw new CmdException("The method annotated as 'Run' must have exactly one argument of the class 'ExecutionContext'");
                 } else {

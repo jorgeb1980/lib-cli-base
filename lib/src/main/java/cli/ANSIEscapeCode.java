@@ -22,11 +22,11 @@ public enum ANSIEscapeCode {
 	 * Builds an escape code object
 	 * @param code Internal code representation
 	 */
-	private ANSIEscapeCode(int code) {
+	ANSIEscapeCode(int code) {
 		this.code = code;
 	}
 
-	private ANSIEscapeCode(int code, Boolean bright) {
+	ANSIEscapeCode(int code, Boolean bright) {
 		this(code);
 		this.bright = bright;
 	}
