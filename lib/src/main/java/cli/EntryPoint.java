@@ -102,8 +102,8 @@ class EntryPoint {
 			formatter.printHelp(
 				usage, 
 				commandDescription, 
-				options, 
-				format(footer, getVersion()),
+				options,
+				getVersion() == null ? null : format(footer, getVersion()),
 				false);
 		}
 		else {
@@ -111,7 +111,7 @@ class EntryPoint {
 				commandName, 
 				commandDescription, 
 				options, 
-				format(footer, getVersion()),
+				getVersion() == null ? null : format(footer, getVersion()),
 				true);
 		}
 	}
@@ -125,7 +125,7 @@ class EntryPoint {
 		String ret = null;
 		for (var field: fields) {
 			if (field.isAnnotationPresent(OptionalArgs.class)) {
-				OptionalArgs annotation = field.getAnnotation(OptionalArgs.class);
+				var annotation = field.getAnnotation(OptionalArgs.class);
 				ret = annotation.name();
 			}
 		}
@@ -134,16 +134,15 @@ class EntryPoint {
 
 	// Gets the current application version from the cli.properties file
 	private static String getVersion() {
-		String ret = "";
-		try (var is = EntryPoint.class.getClassLoader().
-				getResourceAsStream("cli.properties")) {
+		var ret = "";
+		try (var is = EntryPoint.class.getClassLoader().getResourceAsStream("cli.properties")) {
 			var prop = new Properties();
 			prop.load(is);
 			ret = prop.getProperty("cli.version");
 		}
 		catch(Exception e) {
 			// No version
-			ret = "undetermined";
+			logger.log(Level.FINE, "Could not find cli.version in cli.properties - Please define it in order to get a version footer in the command help");
 		}
 		return ret;
 	}
