@@ -252,7 +252,10 @@ class EntryPoint {
 				if (!parameter.longName().trim().isEmpty()) {
 					methodsMap.put(parameter.longName(), method);
 				}
-				
+				// Force false for all flags before applying the arguments - we assume it is turned down!
+				if (isBooleanType(field)) {
+					method.invoke(command, Boolean.FALSE);
+				}
 			}
 			else if (method != null && field.isAnnotationPresent(OptionalArgs.class)) {
 				optionalArgsMethod = method;
@@ -270,7 +273,7 @@ class EntryPoint {
 		//	present, it is assumed to be true
 
 		var errors = new LinkedList<Exception>();
-		for (Option option: commandLine.getOptions()) {
+		for (var option: commandLine.getOptions()) {
 			var method = methodsMap.get(option.getOpt());
 			if (method == null) {
 				method = methodsMap.get(option.getLongOpt());
@@ -364,8 +367,8 @@ class EntryPoint {
 				// Boolean arguments
 				else if (type.equals(Boolean.class)) {
 					if (value != null) { throw new ParseException("Boolean types do not allow a value"); }
-					// If value here is null or empty, it is assumed to be false
 					else {
+						// Now we activate the boolean flag we had previously turned down
 						ret = Boolean.TRUE;
 					}
 				}

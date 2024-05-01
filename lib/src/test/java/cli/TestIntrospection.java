@@ -86,11 +86,22 @@ public class TestIntrospection {
     }
 
     @Test
-    public void testBooleanShouldNotHaveArguments() {
+    public void testBooleanShouldNotHaveArguments1() {
         assertThrowsExactly(CmdException.class, () -> {
             new EntryPoint().executeEntryPoint(
                 "cli.SampleCommand",
                 asList("-flag", "lalala", "-enumParam", "bar"),
+                Paths.get("")
+            );
+        });
+    }
+
+    @Test
+    public void testBooleanShouldNotHaveArguments2() {
+        assertThrowsExactly(CmdException.class, () -> {
+            new EntryPoint().executeEntryPoint(
+                "cli.SampleCommand",
+                asList("-flag", "true"),
                 Paths.get("")
             );
         });
