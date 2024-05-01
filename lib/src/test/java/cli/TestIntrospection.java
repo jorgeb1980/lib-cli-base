@@ -90,7 +90,7 @@ public class TestIntrospection {
         assertThrowsExactly(CmdException.class, () -> {
             new EntryPoint().executeEntryPoint(
                 "cli.SampleCommand",
-                asList("-flag", "-enumParam", "bar"),
+                asList("-flag", "lalala", "-enumParam", "bar"),
                 Paths.get("")
             );
         });

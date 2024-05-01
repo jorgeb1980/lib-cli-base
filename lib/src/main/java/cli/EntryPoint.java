@@ -3,7 +3,13 @@ package cli;
 import cli.annotations.Command;
 import cli.annotations.OptionalArgs;
 import cli.annotations.Parameter;
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.MissingOptionException;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
@@ -15,7 +21,11 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -278,11 +288,20 @@ class EntryPoint {
 			throw new ParseException(errors.stream().map(Exception::getMessage).collect(Collectors.joining("\n")));
 		}
 		if (optionalArgsMethod != null) {
-			// The method must exist and admit a list of strings as its only
-			//	parameter
+			// The method must exist and may receive a list of strings as its only parameter
 			var args = Arrays.asList(commandLine.getArgs());
 			if (!args.isEmpty()) {
 				optionalArgsMethod.invoke(command, args);
+			}
+		} else {
+			if (commandLine.getArgs() != null && commandLine.getArgs().length > 0) {
+				// The command line parsed args and it is not contemplated
+				throw new ParseException(
+					String.format(
+						"Could not parse %s %n",
+						Arrays.asList(commandLine.getArgs()).stream().collect(Collectors.joining(","))
+					)
+				);
 			}
 		}
 	}
@@ -315,7 +334,7 @@ class EntryPoint {
 			var valueOf = clazz.getMethod("valueOf", String.class);
 			return valueOf.invoke(null, value.toUpperCase());
 		} catch (Exception e) {
-			throw new ParseException(String.format("Could not parse '%s' to type %s", value, clazz.getName()));
+			throw new ParseException(String.format("Could not parse %s to type %s", value, clazz.getName()));
 		}
 	}
 
