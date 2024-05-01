@@ -6,7 +6,6 @@ import cli.annotations.Parameter;
 import org.apache.commons.cli.*;
 
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
@@ -19,6 +18,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 
@@ -55,17 +55,16 @@ class EntryPoint {
 	 * @param args Command arguments
 	 */
 	public static void main(String[] args) {
-		//LogUtils.setupLogs();
 		int ret = 0;
 		try (var s = new Stopwatch("Total time")) {
-			Path currentPath = Paths.get("").toAbsolutePath();
-			String command = head(args);
-			List<String> rest = tail(args);
+			var currentPath = Paths.get("").toAbsolutePath();
+			var command = head(args);
+			var rest = tail(args);
 			// Special case: when asked for --help, print the help straight now
 			if (rest.size() == 1 && rest.contains("--help")) {
 				printHelp(command);
 			} else {
-				EntryPoint entry = new EntryPoint();
+				var entry = new EntryPoint();
 				ret = entry.executeEntryPoint(command, rest, currentPath);
 				entry.flush(false);
 			}
@@ -173,7 +172,7 @@ class EntryPoint {
 	 * @param currentPath File path where the command is executed.
 	 * @throws CmdException if any error is reached during the execution.
 	 */
-	public int executeEntryPoint(String command, List<String> commandArguments, Path currentPath) 
+	public int executeEntryPoint(String command, List<String> commandArguments, Path currentPath)
 			throws CmdException {
 		int ret;
 		if (command != null) {
@@ -207,7 +206,8 @@ class EntryPoint {
 				buildOptions(command.getClass()), 
 				args.toArray(new String[args.size()]),
 				// Fail if there is something unrecognized
-				false);
+				false
+			);
 			applyArguments(command, commandLine);
 			// Apply the command line to the command
 			ret = execute.invoke(command, new ExecutionContext(currentPath, standardOutput, errorOutput));
@@ -227,7 +227,7 @@ class EntryPoint {
 	
 	// This method applies every argument in the command line to the command object
 	private void applyArguments(Object command, CommandLine commandLine) 
-			throws IllegalAccessException, InvocationTargetException {
+			throws IllegalAccessException, InvocationTargetException, ParseException {
 		// Map the setter methods to commandLine option names
 		var methods = command.getClass().getMethods();
 		var fields = command.getClass().getDeclaredFields();
@@ -259,15 +259,24 @@ class EntryPoint {
 		//	Float
 		// An argument-less parameter is supposed to be a Boolean, and if it is
 		//	present, it is assumed to be true
-		
+
+		var errors = new LinkedList<Exception>();
 		for (Option option: commandLine.getOptions()) {
 			var method = methodsMap.get(option.getOpt());
 			if (method == null) {
 				method = methodsMap.get(option.getLongOpt());
 			}
 			if (method != null) {
-				method.invoke(command, processArgument(method, option.getValue()));
+				try {
+					method.invoke(command, processArgument(method, option.getValue()));
+				} catch (Exception e) {
+					errors.add(e);
+				}
 			}
+		}
+		if (!errors.isEmpty()) {
+			// Unable to parse certain options
+			throw new ParseException(errors.stream().map(Exception::getMessage).collect(Collectors.joining("\n")));
 		}
 		if (optionalArgsMethod != null) {
 			// The method must exist and admit a list of strings as its only
@@ -301,41 +310,57 @@ class EntryPoint {
 		return ret;
 	}
 
+	private Object getEnum(Class<?> clazz, String value) throws ParseException {
+		if (value == null) throw new ParseException(String.format("Could not parse an empty value to type %s", clazz.getName()));
+		try {
+			var valueOf = clazz.getMethod("valueOf", String.class);
+			return valueOf.invoke(null, value.toUpperCase());
+		} catch (Exception e) {
+			throw new ParseException(String.format("Could not parse '%s' to type %s", value, clazz.getName()));
+		}
+	}
+
 	// This method processes the option value in order to pass the right type
 	//	to the command object
-	private Object processArgument(Method method, String value) {
+	private Object processArgument(Method method, String value) throws ParseException {
 		Object ret = null;
 		Class<?>[] types = method.getParameterTypes();
-		if (types.length == 1) {
-			Class<?> type = types[0];
-			if (type.equals(String.class)) {
-				ret = value;
-			}
-			else if (type.equals(Integer.class)) {
-				ret = Integer.valueOf(value);
-			}
-			else  if (type.equals(Long.class)) {
-				ret = Long.valueOf(value);
-			}
-			// This can be improved by looking closely at precision, etc.
-			else  if (type.equals(Double.class)) {
-				ret = Double.valueOf(value);
-			}
-			else  if (type.equals(Float.class)) {
-				ret = Float.valueOf(value);
-			}
-			// Boolean arguments
-			else if (type.equals(Boolean.class)) {
-				// If value here is null or empty, it is assumed to be true
-				if (value == null || value.trim().isEmpty()) {
-					ret = Boolean.TRUE;
+		try {
+			if (types.length == 1) {
+				Class<?> type = types[0];
+				if (type.isEnum()) {
+					ret = getEnum(type, value);
+				} else if (type.equals(String.class)) {
+					ret = value;
+				} else if (type.equals(Integer.class)) {
+					ret = Integer.valueOf(value);
+				} else if (type.equals(Long.class)) {
+					ret = Long.valueOf(value);
 				}
-				else {
-					ret = Boolean.valueOf(value);
+				// This can be improved by looking closely at precision, etc.
+				else if (type.equals(Double.class)) {
+					ret = Double.valueOf(value);
+				} else if (type.equals(Float.class)) {
+					ret = Float.valueOf(value);
+				}
+				// Boolean arguments
+				else if (type.equals(Boolean.class)) {
+					if (value != null) { throw new ParseException("Boolean types do not allow a value"); }
+					// If value here is null or empty, it is assumed to be false
+					else {
+						ret = Boolean.TRUE;
+					}
 				}
 			}
+		} catch (NumberFormatException nfe) {
+			throw new ParseException(String.format("Could not parse '%s' to the expected type", value));
 		}
 		return ret;
+	}
+
+	// We assume that every non-boolean type will require arguments
+	private static boolean isBooleanType(Field f) {
+		return f.getType().equals(boolean.class) || f.getType().equals(Boolean.class);
 	}
 
 	// This method build an Apache Command Line Options object upon
@@ -351,7 +376,7 @@ class EntryPoint {
 				// Build the option
 				var optionBuilder = Option.builder().
 					required(parameter.mandatory()).
-					hasArg(parameter.hasArg()).
+					hasArg(!isBooleanType(field)).
 					desc(parameter.description());
 				if (!parameter.longName().isEmpty())
 					optionBuilder.longOpt(parameter.longName());

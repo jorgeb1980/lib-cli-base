@@ -18,8 +18,6 @@ public @interface Parameter {
 	String longName() default "";
 	// Description
 	String description();
-	// Has it an argument? By default, not
-	boolean hasArg() default false;
 	// Is it mandatory?
 	boolean mandatory() default false;
 }

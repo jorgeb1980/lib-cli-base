@@ -6,11 +6,11 @@ import cli.annotations.Run;
 @Command(command="sample", description="Sample command")
 public class SampleCommand {
 
-    @Parameter(name="param1", longName="parameter1", description="first parameter", hasArg=true)
+    @Parameter(name="param1", longName="parameter1", description="first parameter")
     String param1;
     public void setParam1(String p) { param1 = p; }
 
-    @Parameter(name="param2", longName="parameter2", description="second parameter", hasArg=true)
+    @Parameter(name="param2", longName="parameter2", description="second parameter")
     String param2;
     public void setParam2(String p) { param2 = p; }
 
