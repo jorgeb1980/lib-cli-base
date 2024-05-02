@@ -32,8 +32,8 @@ public class TestIntrospection {
         try {
             var result = new EntryPoint().executeEntryPoint(
                 "cli.SampleCommand",
-                asList("-testParam", "lalala", "-enumParam", "FOO", "-numericParam", "234", "-flag"),
-                Paths.get("")
+                Paths.get(""),
+                "-testParam", "lalala", "-enumParam", "FOO", "-numericParam", "234", "-flag"
             );
             assertEquals(0, result);
         } catch (Exception e) {
@@ -46,8 +46,8 @@ public class TestIntrospection {
         try {
             var result = new EntryPoint().executeEntryPoint(
                 "cli.SampleCommand",
-                asList("-enumParam", "bar"),
-                Paths.get("")
+                Paths.get(""),
+                "-enumParam", "bar"
             );
             assertEquals(0, result);
         } catch (Exception e) {
@@ -60,8 +60,8 @@ public class TestIntrospection {
         assertThrowsExactly(CmdException.class, () -> {
             new EntryPoint().executeEntryPoint(
                 "cli.SampleCommand",
-                asList("-testParam"),
-                Paths.get("")
+                Paths.get(""),
+                "-testParam"
             );
         });
     }
@@ -71,8 +71,8 @@ public class TestIntrospection {
         assertThrowsExactly(CmdException.class, () -> {
             new EntryPoint().executeEntryPoint(
                 "cli.SampleCommand",
-                asList("-testNumeric"),
-                Paths.get("")
+                Paths.get(""),
+                "-testNumeric"
             );
         });
     }
@@ -82,8 +82,8 @@ public class TestIntrospection {
         assertThrowsExactly(CmdException.class, () -> {
             new EntryPoint().executeEntryPoint(
                 "cli.SampleCommand",
-                asList("-testEnum"),
-                Paths.get("")
+                Paths.get(""),
+                "-testEnum"
             );
         });
     }
@@ -93,8 +93,10 @@ public class TestIntrospection {
         assertThrowsExactly(CmdException.class, () -> {
             new EntryPoint().executeEntryPoint(
                 "cli.SampleCommand",
-                asList("-flag", "lalala", "-enumParam", "bar"),
-                Paths.get("")
+                Paths.get(""),
+                // careful - this would succeed if the sample command had optional arguments, lalala would then be
+                //  interpreted as the optional args
+                "-flag", "lalala", "-enumParam", "bar"
             );
         });
     }
@@ -104,8 +106,8 @@ public class TestIntrospection {
         assertThrowsExactly(CmdException.class, () -> {
             new EntryPoint().executeEntryPoint(
                 "cli.SampleCommand",
-                asList("-flag", "true"),
-                Paths.get("")
+                Paths.get(""),
+                "-flag", "true"
             );
         });
     }
@@ -115,8 +117,8 @@ public class TestIntrospection {
         assertThrowsExactly(CmdException.class, () -> {
             new EntryPoint().executeEntryPoint(
                 "cli.SampleCommand",
-                asList("-enumParam", "doesNotExistInEnumType"),
-                Paths.get("")
+                Paths.get(""),
+                "-enumParam", "doesNotExistInEnumType"
             );
         });
     }
@@ -126,8 +128,8 @@ public class TestIntrospection {
         assertThrowsExactly(CmdException.class, () -> {
             new EntryPoint().executeEntryPoint(
                 "cli.SampleCommand",
-                asList("-numericParam", "thisIsNotANumber"),
-                Paths.get("")
+                Paths.get(""),
+                "-numericParam", "thisIsNotANumber"
             );
         });
     }
