@@ -106,9 +106,18 @@ parameters for the script.
 is expected to have some value and should be of type `String`
     - `mandatory`: if true, the framework will enforce its presence
 
-### Output
+### Debugging
 
-The generated shell scripts will just output whatever is written into 
-`ExecutionContext::standardOutput` and `ExecutionContext::errorOutput`; however, if the env variable `CLI_LOG_LEVEL` is
-set to one of the predefined values in `java.util.logging.Level`, it will override the behavior and log additional info
-if asked.
+If the env variable `CLI_LOG_LEVEL` is
+set to one of the predefined values in `java.util.logging.Level`, the framework will log additional info.
+
+```
+$ CLI_LOG_LEVEL=FINEST ./target/redist/scripts/ls.sh --color -hal pom.xml
+[2024-05-02 17:06:45] [FINEST] Overridden log level to FINEST by env var CLI_LOG_LEVEL
+[2024-05-02 17:06:46] [FINE  ] looking for command -> 12 mseg
+[2024-05-02 17:06:46] [FINE  ] instantiate command -> 0 mseg
+[2024-05-02 17:06:46] [FINE  ] find execute method -> 9 mseg
+-rw-rw-rw-    whatever   whatever     3,2K May  2 15:43 pom.xml
+[2024-05-02 17:06:46] [FINE  ] execute command -> 20 mseg
+[2024-05-02 17:06:46] [FINE  ] Total time -> 46 mseg
+```
