@@ -39,11 +39,11 @@ This will generate a maven project with the following structure:
 @Command(command="sample", description="Sample command")
 public class SampleCommand {
 
-    @Parameter(name="param1", longName="parameter1", description="first parameter", hasArg=true)
+    @Parameter(name="param1", longName="parameter1", description="first parameter")
     String param1;
     public void setParam1(String p) { param1 = p; }
 
-    @Parameter(name="param2", longName="parameter2", description="second parameter", hasArg=true)
+    @Parameter(name="param2", longName="parameter2", description="second parameter")
     String param2;
     public void setParam2(String p) { param2 = p; }
 
@@ -53,7 +53,7 @@ public class SampleCommand {
 
     @Run
     // Entry point for df
-    public int execute(ExecutionContext ctx) throws Exception {
+    public int execute(Path cwd) throws Exception {
         System.out.printf("Parameters: %s %s %s%n", param1, param2, flag);
         return 0;
     }
@@ -93,22 +93,32 @@ Create annotated command classes following these rules:
   - The `command` attribute will be translated to the script name
   - The `description` attribute will be used to generate the `--help` output
 - Every command class must define a method annotated with `cli.annotations.Run` and receiving a single parameter of type 
-`cli.ExecutionContext` - this is your entry point for the command
+`java.nio.file.Path` with the working directory
 - Every command class may define optionally fields annotated with `cli.annotations.Parameter`, that will be translated into 
 parameters for the script.
-  - Each one allows to define `name`, `longName`, `description`, `hasArg` and `mandatory` attributes
+  - Each one allows to define `name`, `longName`, `description` and `mandatory` attributes
     - `name`, `longName` will be used to identify the parameters in the command line.  At least one must be defined.
       - `name` = "f": means the script can be called with `-f` or `--f`
       - `longName` = "file": means the script can be called with `-file` or `--file`
         - If both are present, all 4 alternatives are valid
     - `description` will be used to generate the `--help` output
-    - `hasArg`: (default: false) if false, the parameter is a flag and should be declared as `Boolean` in the command class.  If true, it 
-is expected to have some value and should be of type `String`
     - `mandatory`: if true, the framework will enforce its presence
+  - If a property is annotated with `cli.annotations.OptionalArgs`, with the type `List<String>`, it will be used to gather
+whatever additional parameters are found in the command line.  Consider for example in the `ls` command, the `FILE` parameter:
+    - ```usage:  ls [-a] [-A] [-B] <edited...> [-I <arg>] [-l] [-R] [FILE]...```
 
-### Output
+### Debugging
 
-The generated shell scripts will just output whatever is written into 
-`ExecutionContext::standardOutput` and `ExecutionContext::errorOutput`; however, if the env variable `CLI_LOG_LEVEL` is
-set to one of the predefined values in `java.util.logging.Level`, it will override the behavior and log additional info
-if asked.
+If the env variable `CLI_LOG_LEVEL` is
+set to one of the predefined values in `java.util.logging.Level`, the framework will log additional info.
+
+```
+$ CLI_LOG_LEVEL=FINEST ./target/redist/scripts/ls.sh --color -hal pom.xml
+[2024-05-02 17:06:45] [FINEST] Overridden log level to FINEST by env var CLI_LOG_LEVEL
+[2024-05-02 17:06:46] [FINE  ] looking for command -> 12 mseg
+[2024-05-02 17:06:46] [FINE  ] instantiate command -> 0 mseg
+[2024-05-02 17:06:46] [FINE  ] find execute method -> 9 mseg
+-rw-rw-rw-    whatever   whatever     3,2K May  2 15:43 pom.xml
+[2024-05-02 17:06:46] [FINE  ] execute command -> 20 mseg
+[2024-05-02 17:06:46] [FINE  ] Total time -> 46 mseg
+```

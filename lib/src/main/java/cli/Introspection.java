@@ -4,13 +4,13 @@ import cli.annotations.Run;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 public class Introspection {
 
-    private String commandClassName;
+    private final String commandClassName;
     private Class<?> commandClass;
     private Object command;
     private Method method;
@@ -73,12 +73,10 @@ public class Introspection {
             if (methods.isEmpty()) throw new NoSuchElementException();
             else if (methods.size() > 1) throw new CmdException("Only one method annotated as 'Run' per command class");
             else {
-                var m = methods.get(0);
-                if (m.getParameters().length != 1 || m.getParameters()[0].getType() != ExecutionContext.class) {
+                var m = methods.getFirst();
+                if (m.getParameters().length != 1 || m.getParameters()[0].getType() != Path.class)
                     throw new CmdException("The method annotated as 'Run' must have exactly one argument of the class 'ExecutionContext'");
-                } else {
-                    method = m;
-                }
+                else method = m;
             }
         } catch (NoSuchElementException | SecurityException e) {
             throw new CmdException(e).setReturnCode(-1337);
