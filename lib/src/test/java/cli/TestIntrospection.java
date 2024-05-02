@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Method;
 import java.nio.file.Paths;
 
-import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;

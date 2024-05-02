@@ -4,6 +4,8 @@ import cli.annotations.Command;
 import cli.annotations.Parameter;
 import cli.annotations.Run;
 
+import java.nio.file.Path;
+
 @Command(command = "test", description = "this is a test command")
 public class SampleCommand {
 
@@ -36,7 +38,8 @@ public class SampleCommand {
     public void setBooleanParam(Boolean b) { booleanParam = b; }
 
     @Run
-    public int someMethod(ExecutionContext ctx) {
+    public int someMethod(Path cwd) {
+        System.out.println(cwd);
         System.out.println(testParam);
         System.out.println(enumParam);
         System.out.println(numericParam);

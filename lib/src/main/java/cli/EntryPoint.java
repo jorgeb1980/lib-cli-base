@@ -17,8 +17,6 @@ import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -37,29 +35,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 class EntryPoint {
 
-	//------------------------------------------------------------
-	// Class constants
-	
-	// Output encoding
-	public static final Charset ENCODING = UTF_8;
-	
-	//------------------------------------------------------------
-	// Class properties
-
 	// Logger
 	private final static Logger logger = Logger.getLogger(EntryPoint.class.getName());
-	// Program's own standardOutput
-	private final ByteArrayOutputStream stdBytes = new ByteArrayOutputStream();
-	private final PrintWriter standardOutput = new PrintWriter(new OutputStreamWriter(stdBytes, ENCODING)
-	);
-	private final ByteArrayOutputStream errBytes = new ByteArrayOutputStream();
-	// Program's own errorOutput
-	private final PrintWriter errorOutput = new PrintWriter(new OutputStreamWriter(errBytes, ENCODING)
-	);
-	
-	//------------------------------------------------------------
-	// Class methods	
-	
+
 	/**
 	 * Entry point for the command launcher.
 	 * @param args Command arguments
@@ -76,7 +54,6 @@ class EntryPoint {
 			} else {
 				var entry = new EntryPoint();
 				ret = entry.executeEntryPoint(command, currentPath, rest);
-				entry.flush(false);
 			}
 		} catch (CmdException cmde) {
 			logger.log(Level.SEVERE, cmde.getMessage(), cmde);
@@ -164,19 +141,6 @@ class EntryPoint {
 	public EntryPoint() { }
 
 	/**
-	 * Flush the content of the output buffers to the real standard
-	 * and error output.
-	 */
-	public void flush(boolean error) {
-		standardOutput.flush();
-		System.out.print(stdBytes.toString(ENCODING));
-		if (error) {
-			errorOutput.flush();
-			System.err.print(errBytes.toString(ENCODING));
-		}
-	}
-
-	/**
 	 * Executes a command with certain parameters and path.
 	 * @param command Name of the command to execute.
 	 * @param commandArguments Arguments for the command.
@@ -185,7 +149,7 @@ class EntryPoint {
 	 */
 	public int executeEntryPoint(String command, Path currentPath, String... commandArguments)
 			throws CmdException {
-		int ret;
+		final int ret;
 		if (command != null) {
 			var introspection = new Introspection(command);
 			try (var s = new Stopwatch("execute command")) {
@@ -221,7 +185,7 @@ class EntryPoint {
 			);
 			applyArguments(command, commandLine);
 			// Apply the command line to the command
-			ret = execute.invoke(command, new ExecutionContext(currentPath, standardOutput, errorOutput));
+			ret = execute.invoke(command, currentPath);
 		} 
 		catch (IllegalAccessException 
 				| IllegalArgumentException 
@@ -393,7 +357,7 @@ class EntryPoint {
 		//	us to the setter method
 		var fields = commandClass.getDeclaredFields();
 		var options = new Options();
-		for (Field field: fields) {
+		for (var field: fields) {
 			if (field.isAnnotationPresent(Parameter.class)) {
 				var parameter = field.getAnnotation(Parameter.class);
 				// Build the option
