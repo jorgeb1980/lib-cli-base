@@ -15,4 +15,6 @@ public @interface Command {
 	String command();
 	// Command description
 	String description();
+	// Additional args necessary for java vm
+	String jvmArgs() default "";
 }

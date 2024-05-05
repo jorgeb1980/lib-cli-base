@@ -89,9 +89,10 @@ public class CliGeneratorMojo extends AbstractMojo {
                     // Optimization: let the entry point get straight the class name,
                     //	we are making the work in advance!
                     var commandClass = command.getCanonicalName();
+                    var jvmArgs = annotation.jvmArgs();
                     var script = new File(scriptsDir, commandName + "." + extension);
                     script.createNewFile();
-                    var formattedText = templateContent.replaceAll("<<COMMAND_CLASS>>", commandClass);
+                    var formattedText = templateContent.replaceAll("<<COMMAND_CLASS>>", commandClass).replaceAll("<<JVM_ARGS>>", jvmArgs.trim());
                     Files.write(script.toPath(), formattedText.getBytes(StandardCharsets.UTF_8));
                     makeExecutable(script);
                 }
