@@ -68,14 +68,19 @@ public class Introspection {
         try {
             var methods =
                 Arrays.stream(commandClass.getDeclaredMethods()).filter(
-                    m -> m.isAnnotationPresent(Run.class)
+                    m -> m.isAnnotationPresent(Run.class) && m.getReturnType() == int.class
                 ).toList();
-            if (methods.isEmpty()) throw new NoSuchElementException();
+            if (methods.isEmpty()) throw new NoSuchElementException("""
+            Please define a method:
+                - Annotated with @Run
+                - That receives a single Path parameter
+                - That returns int
+            """);
             else if (methods.size() > 1) throw new CmdException("Only one method annotated as 'Run' per command class");
             else {
                 var m = methods.getFirst();
                 if (m.getParameters().length != 1 || m.getParameters()[0].getType() != Path.class)
-                    throw new CmdException("The method annotated as 'Run' must have exactly one argument of the class 'ExecutionContext'");
+                    throw new CmdException("The method annotated as 'Run' must have exactly one argument of the class 'Path'");
                 else method = m;
             }
         } catch (NoSuchElementException | SecurityException e) {
