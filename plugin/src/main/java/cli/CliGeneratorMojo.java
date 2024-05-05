@@ -57,7 +57,7 @@ public class CliGeneratorMojo extends AbstractMojo {
             perms.add(OTHERS_EXECUTE);
             setPosixFilePermissions(path, perms);
         } catch (UnsupportedOperationException uoe) {
-            System.err.println(uoe.getMessage());
+            getLog().warn(String.format("Unable to set permissions for %s - irrelevant if OS is Windows", f.getName()));
         }
     }
 
@@ -75,7 +75,7 @@ public class CliGeneratorMojo extends AbstractMojo {
             // Scan for the annotated classes
             Set<Class<?>> commands = new Reflections().getTypesAnnotatedWith(clazz);
             for (Class<?> eachClazz: commands) {
-                System.out.println(eachClazz);
+                if (eachClazz != null) getLog().info(String.format("Generating scripts for %s", eachClazz));
             }
             File scriptsDir = new File(project.getBuild().getDirectory(), "redist/scripts");
             scriptsDir.mkdirs();
