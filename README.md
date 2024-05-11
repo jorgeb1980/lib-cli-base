@@ -93,6 +93,7 @@ Create annotated command classes following these rules:
   - The `command` attribute will be translated to the script name
   - The `description` attribute will be used to generate the `--help` output
   - The optional `jvmArgs` attribute will be added to the java virtual machine command line - use it for additional heap, etc.
+  - The optional `isBackground` attribute will allow to create Swing UIs or similar by telling the framework not to exit immediately.
 - Every command class must define a method annotated with `cli.annotations.Run` and receiving a single parameter of type 
 `java.nio.file.Path` with the working directory
 - Every command class may define optionally fields annotated with `cli.annotations.Parameter`, that will be translated into 
