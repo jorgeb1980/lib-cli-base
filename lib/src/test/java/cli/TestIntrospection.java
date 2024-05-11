@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -129,6 +130,29 @@ public class TestIntrospection {
                 "cli.SampleCommand",
                 Paths.get(""),
                 "-numericParam", "thisIsNotANumber"
+            );
+        });
+    }
+
+    @Test
+    public void testBackgroundApp() {
+        try {
+            var result = new EntryPoint().executeEntryPoint(
+                "cli.SampleBackgroundApp",
+                Paths.get("")
+            );
+            assertNull(result);
+        } catch (Exception e) {
+            fail(e);
+        }
+    }
+
+    @Test
+    public void testWrongBackgroundApp() {
+        assertThrowsExactly(CmdException.class, () -> {
+            new EntryPoint().executeEntryPoint(
+                "cli.SampleWrongBackgroundApp",
+                Paths.get("")
             );
         });
     }

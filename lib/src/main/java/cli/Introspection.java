@@ -1,5 +1,6 @@
 package cli;
 
+import cli.annotations.Command;
 import cli.annotations.Run;
 
 import java.lang.reflect.InvocationTargetException;
@@ -63,22 +64,36 @@ public class Introspection {
         }
     }
 
+    private boolean isAcceptable(Class<?> clazz) {
+        return clazz == int.class
+            || clazz == void.class;
+    }
+
+    private boolean isBackgroundApp(Class<?> clazz) {
+        return !Arrays.stream(clazz.getAnnotations()).filter(
+            annotation -> annotation instanceof Command c && c.isBackground()
+        ).toList().isEmpty();
+    }
+
     // Finds an execute method in the command class
     private void findExecuteMethod() throws CmdException {
         try {
             var methods =
                 Arrays.stream(commandClass.getDeclaredMethods()).filter(
-                    m -> m.isAnnotationPresent(Run.class) && m.getReturnType() == int.class
+                    m -> m.isAnnotationPresent(Run.class) && isAcceptable(m.getReturnType())
                 ).toList();
             if (methods.isEmpty()) throw new NoSuchElementException("""
             Please define a method:
                 - Annotated with @Run
                 - That receives a single Path parameter
-                - That returns int
+                - That returns int or void (only for commands intended to run in the background)
             """);
             else if (methods.size() > 1) throw new CmdException("Only one method annotated as 'Run' per command class");
             else {
                 var m = methods.getFirst();
+                // Validate that the method returns void if the class is a background app
+                if (isBackgroundApp(commandClass) && m.getReturnType() != void.class)
+                    throw new CmdException("The method annotated as 'Run' must return void if the command is intended to run in the background");
                 if (m.getParameters().length != 1 || m.getParameters()[0].getType() != Path.class)
                     throw new CmdException("The method annotated as 'Run' must have exactly one argument of the class 'Path'");
                 else method = m;
