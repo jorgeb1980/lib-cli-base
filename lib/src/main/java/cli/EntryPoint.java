@@ -43,7 +43,7 @@ class EntryPoint {
 	 * @param args Command arguments
 	 */
 	public static void main(String[] args) {
-		int ret = 0;
+		Integer ret = 0;
 		try (var s = new Stopwatch("Total time")) {
 			var currentPath = Paths.get("").toAbsolutePath();
 			var command = head(args);
@@ -60,7 +60,7 @@ class EntryPoint {
 			System.exit(cmde.getReturnCode());
 		}
 		// The command returned some exit code, this is our return code
-		System.exit(ret);
+		if (ret != null) System.exit(ret);
 	}
 
 	private static boolean isEmpty(String s) {
@@ -147,9 +147,9 @@ class EntryPoint {
 	 * @param currentPath File path where the command is executed.
 	 * @throws CmdException if any error is reached during the execution.
 	 */
-	public int executeEntryPoint(String command, Path currentPath, String... commandArguments)
+	public Integer executeEntryPoint(String command, Path currentPath, String... commandArguments)
 			throws CmdException {
-		final int ret;
+		final Integer ret;
 		if (command != null) {
 			var introspection = new Introspection(command);
 			try (var s = new Stopwatch("execute command")) {

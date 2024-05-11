@@ -17,4 +17,6 @@ public @interface Command {
 	String description();
 	// Additional args necessary for java vm
 	String jvmArgs() default "";
+	// Is the command intended to be a background app? like a swing app
+	boolean isBackground() default false;
 }

@@ -9,7 +9,6 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.classworlds.realm.ClassRealm;
 import org.reflections.Reflections;
 
 import java.io.File;
@@ -18,14 +17,20 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.attribute.PosixFileAttributes;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.List;
 import java.util.Set;
 
 import static java.nio.file.Files.readAttributes;
 import static java.nio.file.Files.setPosixFilePermissions;
-import java.nio.file.attribute.PosixFilePermission;
-import java.nio.file.attribute.PosixFileAttributes;
-import static java.nio.file.attribute.PosixFilePermission.*;
+import static java.nio.file.attribute.PosixFilePermission.GROUP_EXECUTE;
+import static java.nio.file.attribute.PosixFilePermission.GROUP_READ;
+import static java.nio.file.attribute.PosixFilePermission.OTHERS_EXECUTE;
+import static java.nio.file.attribute.PosixFilePermission.OTHERS_READ;
+import static java.nio.file.attribute.PosixFilePermission.OWNER_EXECUTE;
+import static java.nio.file.attribute.PosixFilePermission.OWNER_READ;
+import static java.nio.file.attribute.PosixFilePermission.OWNER_WRITE;
 
 @Mojo(name = "generate-files", defaultPhase = LifecyclePhase.PREPARE_PACKAGE)
 public class CliGeneratorMojo extends AbstractMojo {
@@ -92,7 +97,11 @@ public class CliGeneratorMojo extends AbstractMojo {
                     var jvmArgs = annotation.jvmArgs();
                     var script = new File(scriptsDir, commandName + "." + extension);
                     script.createNewFile();
-                    var formattedText = templateContent.replaceAll("<<COMMAND_CLASS>>", commandClass).replaceAll("<<JVM_ARGS>>", jvmArgs.trim());
+                    var formattedText = templateContent.
+                        replaceAll("<<COMMAND_CLASS>>", commandClass).
+                        replaceAll("<<JVM_ARGS>>", jvmArgs.trim()).
+                        replaceAll("<<START_COMMAND>>", annotation.isBackground() ? "start" : "").
+                        replaceAll("<<JAVA_COMMAND>>", annotation.isBackground() ? "javaw" : "java");
                     Files.write(script.toPath(), formattedText.getBytes(StandardCharsets.UTF_8));
                     makeExecutable(script);
                 }
