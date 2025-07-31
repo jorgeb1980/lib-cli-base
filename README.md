@@ -109,11 +109,30 @@ parameters for the script.
 whatever additional parameters are found in the command line.  Consider for example in the `ls` command, the `FILE` parameter:
     - ```usage:  ls [-a] [-A] [-B] <edited...> [-I <arg>] [-l] [-R] [FILE]...```
 
-### Debugging
+### Logging configuration
 
-If the env variable `CLI_LOG_LEVEL` is
-set to one of the predefined values in `java.util.logging.Level`, the framework will log additional info.
+The library provides an opinionated take on plain old `java.util.Logging`.  `LogUtils.getDefaultLogger()` is provided in order to facilitate access to the library logger.
 
+#### Basic logging configuration
+
+By default, the library provides a console logger set to `SEVERE`.
+
+#### Overriding basic configuration
+
+If the application using `lib-cli-base` defines in its classpath a file called `custom-cli-logging.properties`, it will override the basic behavior.  `LogUtils.getDefaultLogger()` will still provide a façade to whatever this custom file defines. 
+
+#### Overriding master log level
+
+The env variable `CLI_LOG_LEVEL` can be set to one of the predefined values in `java.util.logging.Level`.  This new level will be applied to the logger returned by `LogUtils.getDefaultLogger()`.
+
+However, please remember the behavior of `java.util.Logging`: whatever level we set for the façade logger, it is just a first filter; then the levels defined at whatever additional adapter we may have defined in `custom-cli-logging.properties` need to be met too. 
+
+Standard behavior of a hypothetical implementation of `ls` command
+```
+$ ./target/redist/scripts/ls.sh --color -hal pom.xml
+-rw-rw-rw-    whatever   whatever     3,2K May  2 15:43 pom.xml
+```
+Overriding log level by command line
 ```
 $ CLI_LOG_LEVEL=FINEST ./target/redist/scripts/ls.sh --color -hal pom.xml
 [2024-05-02 17:06:45] [FINEST] Overridden log level to FINEST by env var CLI_LOG_LEVEL
