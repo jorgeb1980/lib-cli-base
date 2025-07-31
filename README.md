@@ -60,7 +60,7 @@ public class SampleCommand {
 }
 ```
 
-Runnin `mvn install` in the created project will generate the associated `redist/` directory with the necessary 
+Running `mvn install` in the created project will generate the associated `redist/` directory with the necessary 
 scripts and libraries to be deployed in a windows or unix-like machine.
 
 ```
