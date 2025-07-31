@@ -15,7 +15,6 @@ public class LogUtils {
     private static final String CUSTOM_LOGGING_CONFIGURATION = "/custom-cli-logging.properties";
 
     private static final String ENV_VAR = "CLI_LOG_LEVEL";
-    private static boolean logLevelSet = false;
 
     public LogUtils() {
         try(InputStream stream = getLoggingConfiguration()) {
@@ -25,7 +24,6 @@ public class LogUtils {
 
             var level = getLogLevelFromEnvironment();
             if (level != null) {
-                logLevelSet = true;
                 getLogger("cli").setLevel(level);
                 // The following message will only be shown if log is fine enough
                 getLogger("cli").log(
@@ -33,18 +31,19 @@ public class LogUtils {
                         String.format("Overridden log level to %s by env var %s", level, ENV_VAR)
                 );
             } else {
-                getLogger("cli").setLevel(Level.ALL);
+                if (getLogger("cli").getLevel() == null) {
+                    // If the client app did not define a log level, we assume that the default logger is meant to let
+                    //  everything pass, and we rely on each specific handler level
+                    getLogger("cli").setLevel(Level.ALL);
+                }
             }
         } catch (IOException ioe) { ioe.printStackTrace(); }
     }
 
     private InputStream getLoggingConfiguration() {
         InputStream ret = null;
-        try {
-            ret = LogUtils.class.getResourceAsStream(CUSTOM_LOGGING_CONFIGURATION);
-        } catch (Exception e) {
-            ret = LogUtils.class.getResourceAsStream(DEFAULT_LOGGING_CONFIGURATION);
-        }
+        ret = LogUtils.class.getResourceAsStream(CUSTOM_LOGGING_CONFIGURATION);
+        if (ret == null) ret = LogUtils.class.getResourceAsStream(DEFAULT_LOGGING_CONFIGURATION);
         return ret;
     }
 
