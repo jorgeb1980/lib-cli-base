@@ -19,6 +19,7 @@ mvn archetype:generate -DarchetypeGroupId=cli-library \
                        -DartifactId=my-artifact \
                        -Dversion=1.0-SNAPSHOT
 ```
+(replacing, of course, `XXX` with the desired release of the plugin).
 
 This will generate a maven project with the following structure:
 
