@@ -115,7 +115,7 @@ The library provides an opinionated take on plain old `java.util.Logging`.  `Log
 
 #### Basic logging configuration
 
-By default, the library provides a console logger set to `SEVERE`.
+By default, `LogUtils.getDefaultLogger()` provides a console logger set to `SEVERE`.
 
 #### Overriding basic configuration
 
@@ -125,7 +125,7 @@ If the application using `lib-cli-base` defines in its classpath a file called `
 
 The env variable `CLI_LOG_LEVEL` can be set to one of the predefined values in `java.util.logging.Level`.  This new level will be applied to the logger returned by `LogUtils.getDefaultLogger()`.
 
-However, please remember the behavior of `java.util.Logging`: whatever level we set for the façade logger, it is just a first filter; then the levels defined at whatever additional adapter we may have defined in `custom-cli-logging.properties` need to be met too. 
+However, please remember the behavior of `java.util.Logging`: whatever level we set for the default logger, it is just a first filter; then the levels defined at whatever additional handler we may have defined in `custom-cli-logging.properties` need to be met too. 
 
 Standard behavior of a hypothetical implementation of `ls` command
 ```
