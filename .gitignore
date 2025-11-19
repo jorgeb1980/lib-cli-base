@@ -3,4 +3,7 @@ target/
 .idea
 .flattened-pom.xml
 .vscode
+.classpath
+.settings
+.project
 
