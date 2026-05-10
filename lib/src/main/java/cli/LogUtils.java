@@ -2,10 +2,11 @@ package cli;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Formatter;
+import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static java.util.logging.Level.SEVERE;
 import static java.util.logging.LogManager.getLogManager;
 import static java.util.logging.Logger.getLogger;
 
@@ -38,6 +39,38 @@ public class LogUtils {
                 }
             }
         } catch (IOException ioe) { ioe.printStackTrace(); }
+    }
+
+    private static class SafeFileHandler extends FileHandler {
+
+        public SafeFileHandler() throws IOException, SecurityException {
+            super();
+        }
+        public SafeFileHandler(String path) throws SecurityException, IOException {
+            super(path);
+        }
+        public SafeFileHandler(String path, boolean append) throws SecurityException, IOException {
+            super(path, append);
+        }
+        public SafeFileHandler(String pattern, int limit, int count) throws SecurityException, IOException {
+            super(pattern, limit, count);
+        }
+        public SafeFileHandler(String pattern, int limit, int count, boolean append) throws SecurityException, IOException {
+            super(pattern, limit, count, append);
+        }
+        public SafeFileHandler(String pattern, long limit, int count, boolean append) throws SecurityException, IOException {
+            super(pattern, limit, count, append);
+        }
+
+        @Override
+        public void close() throws SecurityException {
+            super.close();
+        }
+        @Override
+        public void flush() {
+            super.flush();
+        }
+
     }
 
     private InputStream getLoggingConfiguration() {

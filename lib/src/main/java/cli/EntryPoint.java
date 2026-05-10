@@ -36,7 +36,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 class EntryPoint {
 
 	// Logger
-	private final static Logger logger = Logger.getLogger(EntryPoint.class.getName());
+	private final static Logger logger = LogUtils.getDefaultLogger();
 
 	/**
 	 * Entry point for the command launcher.

@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 
 class Stopwatch implements AutoCloseable {
 
-    private final static Logger logger = Logger.getLogger(Stopwatch.class.getName());
     private Date initial;
     private String message;
 
@@ -18,6 +17,6 @@ class Stopwatch implements AutoCloseable {
     @Override
     public void close() throws CmdException {
         var ending = new Date();
-        logger.log(Level.FINE, message + " -> " + (ending.getTime() - initial.getTime()) + " mseg");
+        LogUtils.getDefaultLogger().log(Level.FINE, message + " -> " + (ending.getTime() - initial.getTime()) + " mseg");
     }
 }
